@@ -21,4 +21,8 @@ I like to experiment with things :)
 In the long run I would like to experiment on:
 * scheduling in limited resource environment
 * using unique/linear types
-* implementing new paradigms for highly parallel evaluators
+* implementing new paradigms for highly parallel evaluators#
+
+License
+======
+Attribution-NonCommercial 2.0 Generic (CC BY-NC 2.0)
