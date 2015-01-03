@@ -4,11 +4,13 @@ import java.util.Deque;
 import java.util.LinkedList;
 
 import com.ak.untrue.Expression.Type;
+import com.ak.untrue.reducers.BetaReducer;
+import com.ak.untrue.reducers.DeltaReducer;
 /**
  * In this version the evaluator is unbounded. Every tick all nodes that are ready to be rewritten
  * are pushed to the queues (for beta and delta redexes) and both queues are emptied in 1 tick, thus
  * simulating totally unbounded parallel machine. After that everything that is ready to be rewritten
- * is marken again and the process repeats itself, until nothing can be rewriten.
+ * is marked again and the process repeats itself, until nothing can be rewritten.
  * 
  * In future versions the worker queues (they represent the amount of memory ports and available ALU
  * units in the virtual processor) can be bounded.
@@ -31,18 +33,17 @@ public final class EvalEngine {
 	public static void updateEnv(String in) {
 		
 	}
-	private static void pushReadyToQueues(Deque<AbstractSyntaxTree<Expression>> deltaRedexes,
-			Deque<AbstractSyntaxTree<Expression>> betaRedexes, 
-			AbstractSyntaxTree<Expression> worker) {
+	private static void pushReadyToQueues(Deque<Expression> deltaRedexes,
+			Deque<Expression> betaRedexes, 
+			Expression worker) {
 		int thisWorkerLength = 0;
-		for(AbstractSyntaxTree<Expression> expr : worker) {
-			Expression exp = expr.getVal();
+		for(Expression exp : worker) {
 			if (exp.isReady()) {
 				Type expType = exp.getType();
 				if (expType.equals(Type.ALU_OP)) {
-					deltaRedexes.push(expr);
+					deltaRedexes.push(exp);
 				} else if (expType.equals(Type.SYMBOL)) {
-					betaRedexes.push(expr);
+					betaRedexes.push(exp);
 				}
 			}
 			thisWorkerLength++;
@@ -50,26 +51,29 @@ public final class EvalEngine {
 		lastEvalMaxWorkerLen = (lastEvalMaxWorkerLen > thisWorkerLength) ? lastEvalMaxWorkerLen : thisWorkerLength;
 	}
 	
+	public static Expression compileStringAST(AbstractSyntaxTree<String> ast) {
+		return null;
+	}
+	
 	public static String evaluate(AbstractSyntaxTree<String> ast) {
 		lastEvalTicks = 0;
 		lastEvalMaxWorkerLen = 0;
 		lastEvalMaxDeltas = 0;
 		lastEvalMaxBetas = 0;
-		Deque<AbstractSyntaxTree<Expression>> deltaRedexes = new LinkedList<>(); 
-		Deque<AbstractSyntaxTree<Expression>> betaRedexes = new LinkedList<>();
-		AbstractSyntaxTree<Expression> worker = new AbstractSyntaxTree<>();
-		
-		//TODO: transpose String ast to Expression ast
-		
+		Deque<Expression> deltaRedexes = new LinkedList<>(); 
+		Deque<Expression> betaRedexes = new LinkedList<>();
+		Expression worker = compileStringAST(ast);
 		pushReadyToQueues(deltaRedexes, betaRedexes, worker);
 		while (!deltaRedexes.isEmpty() || !betaRedexes.isEmpty()) {
 			lastEvalMaxDeltas = (lastEvalMaxDeltas > deltaRedexes.size()) ? lastEvalMaxDeltas : deltaRedexes.size();
 			lastEvalMaxBetas = (lastEvalMaxBetas > betaRedexes.size()) ? lastEvalMaxBetas : betaRedexes.size();
 			while (!deltaRedexes.isEmpty()) {
-				deltaRedexes.removeFirst().getVal().rewrite();
+				Expression toRewrite = deltaRedexes.removeFirst();
+				toRewrite.rewrite(DeltaReducer.getNew(toRewrite));
 			}
 			while (!betaRedexes.isEmpty()) {
-				betaRedexes.removeFirst().getVal().rewrite();
+				Expression toRewrite = deltaRedexes.removeFirst();
+				toRewrite.rewrite(BetaReducer.getNew(toRewrite));
 			}
 			pushReadyToQueues(deltaRedexes, betaRedexes, worker);
 			lastEvalTicks++;

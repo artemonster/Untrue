@@ -44,35 +44,35 @@ public class BetaRedexTests {
 	}	
 	@Test
 	public void testBasicDefine() {
-		String in = "(define five () 5)";
-		String in1 = "(+ 5 five)";
+		EvalEngine.evaluate("(define five () 5)");
+		String in = "(+ 5 five)";
 		String result = EvalEngine.evaluate(in);
 		Assert.assertEquals("10", result);
 		Assert.assertEquals(4, EvalEngine.getTotalTicks());				
 	}
 	@Test
 	public void testBasicDefine2() {
-		String in = "(define square (x) (* x x ))";
-		String in1 = "(square 5)";
+		EvalEngine.evaluate("(define square (x) (* x x ))");
+		String in = "(square 5)";
 		String result = EvalEngine.evaluate(in);
 		Assert.assertEquals("25", result);
 		Assert.assertEquals(4, EvalEngine.getTotalTicks());				
 	}	
 	@Test
 	public void testBasicRecursiveDefine() {
-		String in = "(define fact (x) (if (= x 1) 1 (* x fact(- x 1))))";
-		String in1 = "(fact 10)";
+		EvalEngine.evaluate("(define fact (x) (if (= x 1) 1 (* x fact(- x 1))))");
+		String in = "(fact 10)";
 		String result = EvalEngine.evaluate(in);
 		Assert.assertEquals("625", result);
 		Assert.assertEquals(4, EvalEngine.getTotalTicks());				
 	}
 	@Test
 	public void testConcurrent() {	
-		String in1 = "(define square (x) (* x x ))";
-		String in2 = "(define fact (x) (if (= x 1) 1 (* x fact(- x 1))))";
-		String in3 = "(define dist (x y) (+ (square x) (square y)))";
-		String in4 = "(dist_sq square(5) fact(11))";
-		String result = EvalEngine.evaluate(in3);
+		EvalEngine.evaluate("(define square (x) (* x x ))");
+		EvalEngine.evaluate("(define fact (x) (if (= x 1) 1 (* x fact(- x 1))))");
+		EvalEngine.evaluate("(define dist (x y) (+ (square x) (square y)))");
+		String in = "(dist_sq square(5) fact(11))";
+		String result = EvalEngine.evaluate(in);
 		Assert.assertEquals("625", result);
 		Assert.assertEquals(4, EvalEngine.getTotalTicks());				
 	}
