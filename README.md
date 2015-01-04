@@ -11,7 +11,7 @@ the evaluation you can measure memory accesses and stuff, to get the idea of you
 
 Status
 ======
-This project was started just a while ago and reduction is not working :) 
+This project was started just a while ago and reduction is still not working :) 
 
 Why?
 ======
@@ -22,6 +22,13 @@ In the long run I would like to experiment on:
 * scheduling in limited resource environment
 * using unique/linear types
 * implementing new paradigms for highly parallel evaluators#
+
+TODO
+======
+* ready flag propagation should be implemented (currently (+ 1 2) is not ready)
+* currying/partial application (how to handle a funcall, if it is another list and without full 
+argument list). 
+
 
 License
 ======

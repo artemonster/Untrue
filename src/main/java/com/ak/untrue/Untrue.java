@@ -17,6 +17,10 @@ import java.io.InputStreamReader;
  * 
  * (map (+ fact(150)) (1 2 3 4 5))
  * 
+ * (define repeat (lambda (f) (lambda (x) (f (f x)))))
+ * (define twice (lambda (x) (* 2 x)))
+ * ((repeat twice) 10)
+ * 
  * Expression:
  * 	list of addresses to rewrite a thunk (relative?)
  *	arity (number of required args)

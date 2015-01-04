@@ -25,13 +25,17 @@ public class Expression implements Iterable<Expression> {
 		LITERAL_NUM,
 		LITERAL_BOOL,
 		LITERAL_STR,
-		LITERAL_CHR
+		LITERAL_CHR;
+
+		private int arity_;
+		public int getArity() {
+			return arity_;
+		}
 	}
 	public Integer id_;
 	
 	private Type type_;
 	private int arity_;
-	private int minRdy_;
 	
 	public String value_;
 	
@@ -48,6 +52,9 @@ public class Expression implements Iterable<Expression> {
 	public Expression(String value, int arity, Type type) {
 		id_ = G_ID;
 		G_ID++;
+		args_ = new LinkedList<>();
+		parents_ = new LinkedList<>();
+		type_ = type;
 		value_ = value;
 		arity_ = arity;
 		if (arity == 0) {
@@ -86,7 +93,7 @@ public class Expression implements Iterable<Expression> {
 		args_.remove(child);
 	}
 
-	private void addChildLinkParent(Expression child) {
+	public void addChildLinkParent(Expression child) {
 		args_.add(child);
 		child.addParent(this);	
 	}
@@ -108,7 +115,7 @@ public class Expression implements Iterable<Expression> {
 		private Deque<Expression> toVisit;
 		public ExprIterator(Expression master) {
 			toVisit = new LinkedList<>();
-			toVisit.addAll(master.getChildren());
+			toVisit.add(master);
 		}
 		@Override
 		public boolean hasNext() {
