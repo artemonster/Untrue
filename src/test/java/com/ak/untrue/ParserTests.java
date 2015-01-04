@@ -3,6 +3,8 @@ package com.ak.untrue;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.ak.untrue.util.Parser;
+
 public class ParserTests {
 	
 	@Test

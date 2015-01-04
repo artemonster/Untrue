@@ -43,4 +43,12 @@ public class DeltaRedexTests {
 		Assert.assertEquals("20", result);
 		Assert.assertEquals(2, EvalEngine.getTotalTicks());
 	}
+	
+	@Test
+	public void testBasicConcurrentAdd2() {
+		String in = "(+ (+ (+ 6 2) 3) (* (+ 1 2) 4))";
+		String result = EvalEngine.evaluate(in);
+		Assert.assertEquals("23", result);
+		Assert.assertEquals(3, EvalEngine.getTotalTicks());
+	}	
 }

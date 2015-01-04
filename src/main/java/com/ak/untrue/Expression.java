@@ -39,10 +39,22 @@ public class Expression implements Iterable<Expression> {
 	
 	public String value_;
 	
-	private boolean ready_;
+	private boolean reduced_;
+	
+	public boolean isReduced() {
+		return reduced_;
+	}
 	
 	public boolean isReady() {
-		return ready_;
+		if (reduced_) {
+			return true;
+		} else {
+			boolean checkReady = true;
+			for (Expression arg : args_) {
+				checkReady &= arg.isReduced();
+			}
+			return checkReady;
+		}
 	}	
 	
 	public Type getType() {
@@ -57,10 +69,10 @@ public class Expression implements Iterable<Expression> {
 		type_ = type;
 		value_ = value;
 		arity_ = arity;
-		if (arity == 0) {
-			ready_ = true;
+		if (arity == 0 && (!type.equals(Type.ALU_OP) || !type.equals(Type.SYMBOL))) {
+			reduced_ = true;
 		} else {
-			ready_ = false;
+			reduced_ = false;
 		}
 		lookup.put(id_, this);
 	}
@@ -73,7 +85,11 @@ public class Expression implements Iterable<Expression> {
 		return arity_;
 	}		
 	// ============================ Rewriting utilities ============================
-	public Expression rewrite(Expression newExpr) {
+	public Expression returnUpdated() {
+		return lookup.get(this.id_);
+	}
+	
+	public void rewrite(Expression newExpr) {
 		if(isReady()) { //sanity check
 			for (Expression parent : parents_) {
 				parent.addChildLinkParent(newExpr);
@@ -82,7 +98,6 @@ public class Expression implements Iterable<Expression> {
 			newExpr.id_ = this.id_;
 			lookup.put(newExpr.id_, newExpr);
 		}
-		return null;	
 	}
 	// ============================ Graph manipulation ============================
 	public List<Expression> getChildren() {
@@ -103,7 +118,8 @@ public class Expression implements Iterable<Expression> {
 	}
 	// ============================ Graph iteration and output ============================
 	public String prettyPrint() {
-		return "";
+		//TODO: proper method!
+		return value_.toString();
 	}
 
 	@Override

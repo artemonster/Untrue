@@ -1,13 +1,13 @@
 package com.ak.untrue;
 
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 import com.ak.untrue.Expression.Type;
 import com.ak.untrue.reducers.BetaReducer;
 import com.ak.untrue.reducers.DeltaReducer;
+import com.ak.untrue.util.Parser;
+import com.ak.untrue.util.Translator;
 /**
  * In this version the evaluator is unbounded. Every tick all nodes that are ready to be rewritten
  * are pushed to the queues (for beta and delta redexes) and both queues are emptied in 1 tick, thus
@@ -22,7 +22,6 @@ import com.ak.untrue.reducers.DeltaReducer;
  */
 public final class EvalEngine {
 	private EvalEngine() {};
-	//private static Map<String, Expression> lookup;
 	
 	private static int lastEvalTicks = 0;
 	private static int lastEvalMaxDeltas = 0;
@@ -35,6 +34,7 @@ public final class EvalEngine {
 	public static void updateEnv(String in) {
 		
 	}
+	
 	private static void pushReadyToQueues(Deque<Expression> deltaRedexes,
 			Deque<Expression> betaRedexes, 
 			Expression worker) {
@@ -52,67 +52,7 @@ public final class EvalEngine {
 		}	
 		lastEvalMaxWorkerLen = (lastEvalMaxWorkerLen > thisWorkerLength) ? lastEvalMaxWorkerLen : thisWorkerLength;
 	}
-	
-	private static Type matchType(String symbol) {
-		if (symbol.matches("[0-9]+")) {
-			return Type.LITERAL_NUM;
-		} else if (symbol.matches("#f|#t")){
-			return Type.LITERAL_BOOL;
-		} else if (symbol.matches("\\*|\\+|-|/|and|or|xor|not")){
-			return Type.ALU_OP;
-		} else {
-			return Type.SYMBOL;
-		}
-	}
-	
-	private static int matchArity(String symbol, Type type) {
-		if (type.equals(Type.ALU_OP)) {
-			if (symbol.matches("\\*|\\+|-|/|and|or|xor")) {
-				return 2;
-			} else if (symbol.matches("not")) {
-				return 1;
-			} else {
-				return 999; //TODO: log unknown alu op
-			}
-		} else if (type.equals(Type.SYMBOL))  {
-			return -1; //do not check arity of symbols at this point
-		}else {
-			return 0; //literals have arity 0!
-		}	
-	}	
-	
-	public static Expression compileExpression(AbstractSyntaxTree<String> ast, int arity) {
-		if (ast.getVal() == null) { //top-entry is a list, again. curry?
-			return null;
-		} else { //its a symbol!
-			String symbol = ast.getVal();
-			Type type = matchType(symbol); //match symbol to get a type
-			if (matchArity(symbol, type) >= 0) {
-				assert matchArity(symbol, type)  == arity : "Arity mismatch in "+ast.getVal();
-			}
-			return new Expression(symbol, arity, type);
-		}			
-	}
-	
-	public static Expression compileStringAST(AbstractSyntaxTree<String> ast) {
-		if (ast.getVal() == null) { //top-entry is a list, treat first element as a funcall
-			Deque<AbstractSyntaxTree<String>> args = new LinkedList<>();
-			args.addAll(ast.getNodes());
-			AbstractSyntaxTree<String> sExpr = args.removeFirst();
-			Expression funcall = compileExpression(sExpr, args.size());
-			while (!args.isEmpty()) {
-				AbstractSyntaxTree<String> arg = args.removeFirst();
-				funcall.addChildLinkParent(compileStringAST(arg));
-			}
-			return funcall;			
-		} else { //its a symbol in arg, with no args
-			assert ast.getNodes().size() == 0 : "Argument "+ast.getVal()+" has nodes!"; //sanity check
-			String symbol = ast.getVal();
-			Type type = matchType(symbol); //match symbol to get a type
-			return new Expression(symbol, 0, type);
-		}	
-	}
-	
+
 	public static String evaluate(AbstractSyntaxTree<String> ast) {
 		lastEvalTicks = 0;
 		lastEvalMaxWorkerLen = 0;
@@ -120,7 +60,7 @@ public final class EvalEngine {
 		lastEvalMaxBetas = 0;
 		Deque<Expression> deltaRedexes = new LinkedList<>(); 
 		Deque<Expression> betaRedexes = new LinkedList<>();
-		Expression worker = compileStringAST(ast);
+		Expression worker = Translator.compileStringAST(ast);
 		pushReadyToQueues(deltaRedexes, betaRedexes, worker);
 		while (!deltaRedexes.isEmpty() || !betaRedexes.isEmpty()) {
 			lastEvalMaxDeltas = (lastEvalMaxDeltas > deltaRedexes.size()) ? lastEvalMaxDeltas : deltaRedexes.size();
@@ -135,6 +75,7 @@ public final class EvalEngine {
 				Expression result = BetaReducer.getNew(toRewrite);
 				toRewrite.rewrite(result);
 			}
+			worker = worker.returnUpdated();
 			pushReadyToQueues(deltaRedexes, betaRedexes, worker);
 			lastEvalTicks++;
 		}

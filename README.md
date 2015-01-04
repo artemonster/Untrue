@@ -11,7 +11,7 @@ the evaluation you can measure memory accesses and stuff, to get the idea of you
 
 Status
 ======
-This project was started just a while ago and reduction is still not working :) 
+This project was started just a while ago and only delta reduction works.
 
 Why?
 ======
@@ -25,7 +25,9 @@ In the long run I would like to experiment on:
 
 TODO
 ======
-* ready flag propagation should be implemented (currently (+ 1 2) is not ready)
+* Translator tests (can be useful)
+* beta reduction/environment
+* ready flag propagation should be implemented properly? (when beta will be implemented)
 * currying/partial application (how to handle a funcall, if it is another list and without full 
 argument list). 
 
