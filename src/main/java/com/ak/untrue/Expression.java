@@ -26,41 +26,16 @@ public class Expression implements Iterable<Expression> {
 		LITERAL_BOOL,
 		LITERAL_STR,
 		LITERAL_CHR;
-
-		private int arity_;
-		public int getArity() {
-			return arity_;
-		}
 	}
+	
 	public Integer id_;
 	
 	private Type type_;
 	private int arity_;
 	
 	public String value_;
-	
 	private boolean reduced_;
-	
-	public boolean isReduced() {
-		return reduced_;
-	}
-	
-	public boolean isReady() {
-		if (reduced_) {
-			return true;
-		} else {
-			boolean checkReady = true;
-			for (Expression arg : args_) {
-				checkReady &= arg.isReduced();
-			}
-			return checkReady;
-		}
-	}	
-	
-	public Type getType() {
-		return type_;
-	}
-	
+
 	public Expression(String value, int arity, Type type) {
 		id_ = G_ID;
 		G_ID++;
@@ -83,8 +58,28 @@ public class Expression implements Iterable<Expression> {
 	
 	public int getArity() {
 		return arity_;
-	}		
+	}
+	
+	public Type getType() {
+		return type_;
+	}
+	
+	public boolean isReduced() {
+		return reduced_;
+	}
 	// ============================ Rewriting utilities ============================
+	public boolean isReady() {
+		if (reduced_) {
+			return true;
+		} else {
+			boolean checkReady = true;
+			for (Expression arg : args_) {
+				checkReady &= arg.isReduced();
+			}
+			return checkReady;
+		}
+	}
+	
 	public Expression returnUpdated() {
 		return lookup.get(this.id_);
 	}
@@ -118,7 +113,7 @@ public class Expression implements Iterable<Expression> {
 	}
 	// ============================ Graph iteration and output ============================
 	public String prettyPrint() {
-		//TODO: proper method!
+		//TODO: implement this properly!
 		return value_.toString();
 	}
 

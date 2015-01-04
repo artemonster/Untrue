@@ -5,16 +5,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 /**
- * Basic infinitely nested list implementation. Used to store parsed source and then to execute 
- * upon.
+ * Basic infinitely nested list implementation. Used to store parsed source.
  * 
  * @author akoso_000
  * @param <T> Type of tree data, besides list
  */
 public class AbstractSyntaxTree<T> implements Iterable<AbstractSyntaxTree<T>> {
 	
-	private List<AbstractSyntaxTree<T>> nodes_;//wtf
-	
+	private List<AbstractSyntaxTree<T>> nodes_;
 	private T val_;
 	
 	public AbstractSyntaxTree(T value) {	
