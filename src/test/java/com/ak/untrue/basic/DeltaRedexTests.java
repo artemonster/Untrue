@@ -76,5 +76,5 @@ public class DeltaRedexTests {
 		String result = EvalEngine.evaluate(in);
 		Assert.assertEquals("5", result);
 		Assert.assertEquals(1, EvalEngine.getTotalTicks());
-	}	
+	}
 }

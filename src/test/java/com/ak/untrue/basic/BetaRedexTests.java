@@ -2,12 +2,8 @@ package com.ak.untrue.basic;
 
 import org.junit.Assert;
 import org.junit.Test;
-
 import com.ak.untrue.EvalEngine;
-/**
- * TODO: rewrte define definitions accordingly, test begin 
- * @author akoso_000
- */
+
 public class BetaRedexTests {
 
 	@Test
@@ -117,7 +113,7 @@ public class BetaRedexTests {
 	
 	@Test
 	public void testBasicDefine2() {
-		EvalEngine.evaluate("(define square (x) (* x x ))");
+		EvalEngine.evaluate("(define (square x) (* x x ))");
 		String in = "(square 5)";
 		String result = EvalEngine.evaluate(in);
 		Assert.assertEquals("25", result);
@@ -126,7 +122,7 @@ public class BetaRedexTests {
 	
 	@Test
 	public void testBasicNested() {
-		EvalEngine.evaluate("(define square (x) (* x x ))");
+		EvalEngine.evaluate("(define (square x) (* x x ))");
 		String in = "(square (square 5))";
 		String result = EvalEngine.evaluate(in);
 		Assert.assertEquals("625", result);
@@ -135,7 +131,7 @@ public class BetaRedexTests {
 	
 	@Test
 	public void testBasicRecursiveDefine() {
-		EvalEngine.evaluate("(define fact (x) (if (= x 1) 1 (* x fact(- x 1))))");
+		EvalEngine.evaluate("(define (fact x) (if (= x 1) 1 (* x fact(- x 1))))");
 		String in = "(fact 10)";
 		String result = EvalEngine.evaluate(in);
 		Assert.assertEquals("625", result);
@@ -144,9 +140,9 @@ public class BetaRedexTests {
 	
 	@Test
 	public void testConcurrent() {	
-		EvalEngine.evaluate("(define square (x) (* x x ))");
-		EvalEngine.evaluate("(define fact (x) (if (= x 1) 1 (* x fact(- x 1))))");
-		EvalEngine.evaluate("(define dist (x y) (+ (square x) (square y)))");
+		EvalEngine.evaluate("(define (square x) (* x x ))");
+		EvalEngine.evaluate("(define (fact x) (if (= x 1) 1 (* x fact(- x 1))))");
+		EvalEngine.evaluate("(define (dist x y) (+ (square x) (square y)))");
 		String in = "(dist_sq square(5) fact(11))";
 		String result = EvalEngine.evaluate(in);
 		Assert.assertEquals("625", result);

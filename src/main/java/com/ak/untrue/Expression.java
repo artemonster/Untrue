@@ -7,7 +7,17 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
-
+/**
+ * Expression is a main "workhorse" of the Untrue programming language and resembles LISP's 
+ * S-Expressions. In this case: everything is an expression and everything is an application:
+ * (funcall arg1 arg2...argN) denotes application of "funcall" to the stack of arguments, which are
+ * also expressions by themselves.
+ * 
+ * Whenever possible, an expression can be rewritten by using some evaluation rules like
+ * delta reductions, which are ALU operations on literals, or beta reductions, which are symbol 
+ * resolution, which can be resolved either by an interpreter or by an environment. After reduction,
+ * newly created expression takes place of the old's one and the old one is discarded.
+ */
 public class Expression implements Iterable<Expression> {
 	public enum Type {
 		SYMBOL,
@@ -31,8 +41,8 @@ public class Expression implements Iterable<Expression> {
 	
 	private Map<String, Expression> environment;
 	private Deque<Expression> args;
-	private Deque<String> bindings;
-	private Expression body;
+	//private Deque<String> bindings;
+	//private Expression body;
 	private Set<Expression> parents;
 	
 	private String value;
@@ -114,11 +124,7 @@ public class Expression implements Iterable<Expression> {
 	}
 	
 	public Expression returnUpdated() {
-		if (lookup.containsKey(this.id_)) {
-			return lookup.get(this.id_);
-		} else {
-			return null; //TODO: return root!
-		}
+		return lookup.get(this.id_);
 	}
 	/**
 	 * When called on some expression, it uses newExpr to substitute existing one.
@@ -138,6 +144,7 @@ public class Expression implements Iterable<Expression> {
 			parent.removeChild(this);
 		}
 		newExpr.id_ = this.id_;
+		//TODO: steal the environment too!
 		lookup.put(newExpr.id_, newExpr);				
 	}
 	// ============================ Graph manipulation ============================

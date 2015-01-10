@@ -52,11 +52,17 @@ public class TranslatorTests {
 		Assert.assertEquals("+:[1,3]", root.toString());
 	}
 	@Test
-	public void testStrangeCurry() {
+	public void testStrangeArgs() {
 		String in = "(+ (1 3))";	
 		Expression root = Translator.compileStringAST(Parser.parseString(in));
 		Assert.assertEquals("+:[1:[3]]", root.toString());
 	}
+	@Test
+	public void testStrangeArgs2() {
+		String in = "(+ (1 (3)))";	
+		Expression root = Translator.compileStringAST(Parser.parseString(in));
+		Assert.assertEquals("+:[1:[3]]", root.toString());
+	}	
 	@Test
 	public void testCurry3() {
 		String in = "((((lol) arg1) arg2) arg3 arg4)";	
