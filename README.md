@@ -21,16 +21,28 @@ I like to experiment with things :)
 In the long run I would like to experiment on:
 * scheduling in limited resource environment
 * using unique/linear types
-* implementing new paradigms for highly parallel evaluators#
+* implementing new paradigms for highly parallel evaluators
+
+General Information
+======
+The language is very similar to Scheme in syntax, but differs in evaluation. Everything, which is
+ready to be evaluated - will be evaluated. Also, there is no need in quotations, as list of literals
+like (1 2 3 4) (which should be quoted in scheme/lisp), just evaluates as application of 1 with 
+arguments 2 3 4, and it does nothing. 
+
+* "hd" primitive will remove all children from the expression and leave only the head
+* "tl" primitive will remove head and apply next argument to all subsequent arguments. If there 
+are none, void will be returned.
+* "if" primitive will take a predicate, "then" and "else" expressions and will be rewritten to one of
+"then" and "else", according to the predicate
 
 TODO
 ======
-* Translator tests (can be useful)
+* proper logging
+* proper error handling
 * beta reduction/environment
-* ready flag propagation should be implemented properly? (when beta will be implemented)
-* currying/partial application (how to handle a funcall, if it is another list and without full 
-argument list). 
-
+* ready flag propagation should be implemented properly - children must notify parents after 
+a successful rewrite
 
 License
 ======

@@ -2,24 +2,13 @@ package com.ak.untrue;
 
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Expression implements Iterable<Expression> {
-	//https://www.cs.cmu.edu/~fp/papers/pldi88.pdf
-	private static Map<Integer, Expression> lookup;
-	private static Integer G_ID = 0;
-	
-	static {
-		lookup = new HashMap<>();
-	}
-	
-	private Map<String, Expression> environment;
-	private List<Expression> args_; //TODO: Deque (stack)
-	private List<Expression> parents_; //exprs, which reference this expr TODO: Set!
-	
 	public enum Type {
 		SYMBOL,
 		ALU_OP,
@@ -30,24 +19,37 @@ public class Expression implements Iterable<Expression> {
 		LITERAL_CHR;
 	}
 	
-	public Integer id_;
+	//https://www.cs.cmu.edu/~fp/papers/pldi88.pdf
+	private static Map<Integer, Expression> lookup;
+	private static Integer G_ID = 0;
 	
-	private Type type_;
-	private int arity_;
+	static {
+		lookup = new HashMap<>();
+	}
+	private Integer id_;
 	
-	private String value_;//Can this be a fucking list of expressions actually? Fucked up...
+	
+	private Map<String, Expression> environment;
+	private Deque<Expression> args;
+	private Deque<String> bindings;
+	private Expression body;
+	private Set<Expression> parents;
+	
+	private String value;
+	private Type type;
+	private int arity;
 	private boolean reduced_;
 
 	public Expression(String value, int arity, Type type) {
 		id_ = G_ID;
 		G_ID++;
-		args_ = new LinkedList<>();
+		args = new LinkedList<>();
 		environment = new HashMap<>();
-		parents_ = new LinkedList<>();
-		type_ = type;
-		value_ = value;
-		arity_ = arity;
-		if (arity == 0 && (!type.equals(Type.ALU_OP) || !type.equals(Type.SYMBOL))) {
+		parents = new HashSet<>();
+		this.type = type;
+		this.value = value;
+		this.arity = arity;
+		if (!type.equals(Type.ALU_OP) && !type.equals(Type.SYMBOL)) {
 			reduced_ = true;
 		} else {
 			reduced_ = false;
@@ -56,15 +58,15 @@ public class Expression implements Iterable<Expression> {
 	}
 	// ============================ Get&Set shit ============================
 	public String getValue() {
-		return value_;
+		return value;
 	}	
 	
 	public int getArity() {
-		return arity_;
+		return arity;
 	}
 	
 	public Type getType() {
-		return type_;
+		return type;
 	}
 	
 	public boolean isReduced() {
@@ -88,7 +90,7 @@ public class Expression implements Iterable<Expression> {
 			return environment.get(label);
 		} else {
 			Expression toRet = null;
-			for(Expression parent : parents_) {
+			for(Expression parent : parents) {
 				toRet = parent.find(label);
 			}
 			if(toRet == null) {
@@ -104,7 +106,7 @@ public class Expression implements Iterable<Expression> {
 			return true;
 		} else {
 			boolean checkReady = true;
-			for (Expression arg : args_) {
+			for (Expression arg : args) {
 				checkReady &= arg.isReduced();
 			}
 			return checkReady;
@@ -118,46 +120,65 @@ public class Expression implements Iterable<Expression> {
 			return null; //TODO: return root!
 		}
 	}
-	
+	/**
+	 * When called on some expression, it uses newExpr to substitute existing one.
+	 * If current expression is used as argument for other expressions, then the exact spot
+	 * should be found and substitution must occur.
+	 * @param newExpr
+	 */
 	public void rewrite(Expression newExpr) {
 		assert this.isReady() : "how could this be reduced?";//sanity check
-		if (newExpr.getType() == Type.NIL) {
-			for (Expression parent : parents_) {
-				parent.removeChild(this);
+		for (Expression parent : parents) {
+			LinkedList<Expression> parentChildren = (LinkedList<Expression>) parent.getArgs();
+			int index = parentChildren.indexOf(this);
+			if (newExpr.getType() != Type.NIL) {
+				parentChildren.set(index, newExpr);
+				newExpr.addParent(parent);	
 			}
-			lookup.remove(this.id_);
-		} else {
-			for (Expression parent : parents_) {
-				parent.addChildLinkParent(newExpr);
-				parent.removeChild(this);
-			}
-			newExpr.id_ = this.id_;
-			lookup.put(newExpr.id_, newExpr);				
+			parent.removeChild(this);
 		}
+		newExpr.id_ = this.id_;
+		lookup.put(newExpr.id_, newExpr);				
 	}
 	// ============================ Graph manipulation ============================
-	public List<Expression> getChildren() {
-		return args_;
+	public Deque<Expression> getArgs() {
+		return args;
 	}
 	
 	private void removeChild(Expression child) {
-		args_.remove(child);
+		args.remove(child);
 	}
-
+	
 	public void addChildLinkParent(Expression child) {
-		args_.add(child);
+		args.add(child);
 		child.addParent(this);	
 	}
 
 	private void addParent(Expression parent) {
-		parents_.add(parent);
+		parents.add(parent);
 	}
 	// ============================ Graph iteration and output ============================
 	public String prettyPrint() {
 		//TODO: implement this properly!
-		return value_.toString();
+		return value.toString();
 	}
-
+	
+	public String toString() {
+		if (value != null) {
+			StringBuilder sb = new StringBuilder().append(value.toString());	
+			if (args.size() != 0) {
+				sb.append(":[");
+				for (Expression e: args) {
+					sb.append(e.toString());
+					sb.append(",");
+				}
+				sb.deleteCharAt(sb.length()-1);
+				sb.append("]");
+			}
+			return sb.toString();
+		}
+		return "()";
+	}
 	@Override
 	public Iterator<Expression> iterator() {
 		return new ExprIterator(this);
@@ -178,7 +199,7 @@ public class Expression implements Iterable<Expression> {
 		public Expression next() {
 			Expression visited = toVisit.removeFirst();
 			Deque<Expression> newVisit = new LinkedList<>();
-			newVisit.addAll(visited.getChildren());
+			newVisit.addAll(visited.getArgs());
 			newVisit.addAll(toVisit);
 			toVisit = newVisit;
 			return visited;

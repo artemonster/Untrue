@@ -31,9 +31,6 @@ public final class EvalEngine {
 	public static String evaluate(String in) {
 		return evaluate(Parser.parseString(in));
 	}
-	public static void updateEnv(String in) {
-		
-	}
 	
 	private static void pushReadyToQueues(Deque<Expression> deltaRedexes,
 			Deque<Expression> betaRedexes, 
@@ -71,7 +68,7 @@ public final class EvalEngine {
 				toRewrite.rewrite(result);
 			}
 			while (!betaRedexes.isEmpty()) {
-				Expression toRewrite = deltaRedexes.removeFirst();
+				Expression toRewrite = betaRedexes.removeFirst();
 				Expression result = BetaReducer.getNew(toRewrite);
 				toRewrite.rewrite(result);
 			}
@@ -79,7 +76,7 @@ public final class EvalEngine {
 			pushReadyToQueues(deltaRedexes, betaRedexes, worker);
 			lastEvalTicks++;
 		}
-		return worker.prettyPrint();
+		return worker.toString();
 	}
 
 	public static int getTotalTicks() {

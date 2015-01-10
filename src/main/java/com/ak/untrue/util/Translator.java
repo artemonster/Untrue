@@ -37,7 +37,7 @@ public final class Translator {
 			}
 		} else if (type.equals(Type.SYMBOL))  {
 			return -1; //do not check arity of symbols at this point
-		}else {
+		} else {
 			return 0; //literals have arity 0!
 		}	
 	}	
@@ -57,7 +57,7 @@ public final class Translator {
 	}
 	/**
 	 * Translates string abstract syntax tree to an expression graph, also setting proper
-	 * "applicative" orders, matching expression types, etc.
+	 * applicative orders, matching expression types, etc.
 	 * @param ast to be compiled
 	 * @return Expression worker
 	 */
