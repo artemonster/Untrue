@@ -1,7 +1,9 @@
-package com.ak.untrue;
+package com.ak.untrue.basic;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.ak.untrue.EvalEngine;
 
 public class DeltaRedexTests {
 	@Test
@@ -50,5 +52,29 @@ public class DeltaRedexTests {
 		String result = EvalEngine.evaluate(in);
 		Assert.assertEquals("23", result);
 		Assert.assertEquals(3, EvalEngine.getTotalTicks());
+	}
+	
+	@Test
+	public void testBasicCurry() {
+		String in = "((+ 7) 3)";
+		String result = EvalEngine.evaluate(in);
+		Assert.assertEquals("10", result);
+		Assert.assertEquals(1, EvalEngine.getTotalTicks());
+	}	
+	
+	@Test
+	public void testBasicCurry2() {
+		String in = "(((+) 1) 3)";
+		String result = EvalEngine.evaluate(in);
+		Assert.assertEquals("4", result);
+		Assert.assertEquals(1, EvalEngine.getTotalTicks());
+	}
+	
+	@Test
+	public void testBasicCurry3() {
+		String in = "((+) 2 3)";
+		String result = EvalEngine.evaluate(in);
+		Assert.assertEquals("5", result);
+		Assert.assertEquals(1, EvalEngine.getTotalTicks());
 	}	
 }

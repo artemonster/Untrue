@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Expression implements Iterable<Expression> {
-	
+	//https://www.cs.cmu.edu/~fp/papers/pldi88.pdf
 	private static Map<Integer, Expression> lookup;
 	private static Integer G_ID = 0;
 	
@@ -16,12 +16,14 @@ public class Expression implements Iterable<Expression> {
 		lookup = new HashMap<>();
 	}
 	
-	private List<Expression> args_;
-	private List<Expression> parents_; //exprs, which reference this expr
+	private Map<String, Expression> environment;
+	private List<Expression> args_; //TODO: Deque (stack)
+	private List<Expression> parents_; //exprs, which reference this expr TODO: Set!
 	
 	public enum Type {
 		SYMBOL,
 		ALU_OP,
+		NIL,
 		LITERAL_NUM,
 		LITERAL_BOOL,
 		LITERAL_STR,
@@ -33,13 +35,14 @@ public class Expression implements Iterable<Expression> {
 	private Type type_;
 	private int arity_;
 	
-	public String value_;
+	private String value_;//Can this be a fucking list of expressions actually? Fucked up...
 	private boolean reduced_;
 
 	public Expression(String value, int arity, Type type) {
 		id_ = G_ID;
 		G_ID++;
 		args_ = new LinkedList<>();
+		environment = new HashMap<>();
 		parents_ = new LinkedList<>();
 		type_ = type;
 		value_ = value;
@@ -67,7 +70,35 @@ public class Expression implements Iterable<Expression> {
 	public boolean isReduced() {
 		return reduced_;
 	}
+	
+	public void addToEnv(String label, Expression exp) {
+		environment.put(label,exp);
+	}
 	// ============================ Rewriting utilities ============================
+	public Expression findLocal(String label) {
+		if(environment.containsKey(label)) {
+			return environment.get(label);
+		} else {
+			return null;
+		}
+	}	
+	
+	public Expression find(String label) {
+		if(environment.containsKey(label)) {
+			return environment.get(label);
+		} else {
+			Expression toRet = null;
+			for(Expression parent : parents_) {
+				toRet = parent.find(label);
+			}
+			if(toRet == null) {
+				return null;
+			} else {
+				return toRet;
+			}
+		}
+	}
+
 	public boolean isReady() {
 		if (reduced_) {
 			return true;
@@ -81,17 +112,27 @@ public class Expression implements Iterable<Expression> {
 	}
 	
 	public Expression returnUpdated() {
-		return lookup.get(this.id_);
+		if (lookup.containsKey(this.id_)) {
+			return lookup.get(this.id_);
+		} else {
+			return null; //TODO: return root!
+		}
 	}
 	
 	public void rewrite(Expression newExpr) {
-		if(isReady()) { //sanity check
+		assert this.isReady() : "how could this be reduced?";//sanity check
+		if (newExpr.getType() == Type.NIL) {
+			for (Expression parent : parents_) {
+				parent.removeChild(this);
+			}
+			lookup.remove(this.id_);
+		} else {
 			for (Expression parent : parents_) {
 				parent.addChildLinkParent(newExpr);
 				parent.removeChild(this);
 			}
 			newExpr.id_ = this.id_;
-			lookup.put(newExpr.id_, newExpr);
+			lookup.put(newExpr.id_, newExpr);				
 		}
 	}
 	// ============================ Graph manipulation ============================

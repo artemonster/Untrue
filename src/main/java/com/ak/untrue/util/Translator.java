@@ -43,14 +43,14 @@ public final class Translator {
 	}	
 	
 	private static Expression compileExpression(AbstractSyntaxTree<String> ast, int arity) {
-		if (ast.getVal() == null) { //top-entry is a list, again. curry?
-			//TODO: figure out how to curry things.
-			return null;
+		if (ast.getVal() == null) { //top-entry is a list, again. curry
+			Expression curried = compileStringAST(ast);
+			return curried;
 		} else { //its a symbol!
 			String symbol = ast.getVal();
 			Type type = matchType(symbol); //match symbol to get a type
 			if (matchArity(symbol, type) >= 0) {
-				assert matchArity(symbol, type)  == arity : "Arity mismatch in "+ast.getVal();
+				//assert matchArity(symbol, type)  == arity : "Arity mismatch in "+ast.getVal();
 			}
 			return new Expression(symbol, arity, type);
 		}			

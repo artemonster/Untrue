@@ -49,7 +49,7 @@ public class AbstractSyntaxTree<T> implements Iterable<AbstractSyntaxTree<T>> {
 		if (val_ != null) {
 			return val_.toString();	
 		}
-		return "";
+		return "()";
 	}
 	
 	public String prettyPrint() {

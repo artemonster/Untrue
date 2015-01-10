@@ -1,8 +1,10 @@
-package com.ak.untrue;
+package com.ak.untrue.basic;
 
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.ak.untrue.EvalEngine;
 @Ignore
 public class BetaRedexTests {
 	@Test
@@ -14,7 +16,7 @@ public class BetaRedexTests {
 		Assert.assertEquals(2, EvalEngine.getTotalTicks());		
 	}
 	@Test
-	public void testBasicCall() {
+	public void testBasicCall() {	
 		String in = "(square 5)";
 		String result = EvalEngine.evaluate(in);
 		EvalEngine.updateEnv("TODO:(define square (x) (* x x))");

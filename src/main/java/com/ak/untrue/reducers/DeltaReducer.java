@@ -10,7 +10,7 @@ public class DeltaReducer {
 		String operation = toRewrite.getValue();
 		//sanity checks
 		List<Expression> args = toRewrite.getChildren();
-		assert args.size() == toRewrite.getArity(); 
+		//assert args.size() == toRewrite.getArity(); 
 		assert toRewrite.getType() == Type.ALU_OP;
 		for (Expression arg : args) {
 			assert arg.getType() == Type.LITERAL_NUM || arg.getType() == Type.LITERAL_BOOL;

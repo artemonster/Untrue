@@ -1,8 +1,9 @@
-package com.ak.untrue;
+package com.ak.untrue.basic;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.ak.untrue.AbstractSyntaxTree;
 import com.ak.untrue.util.Parser;
 
 public class ParserTests {
@@ -38,7 +39,7 @@ public class ParserTests {
 		for (AbstractSyntaxTree<String> node: main) {
 			sb.append(node.toString()).append(" ");
 		}		
-		Assert.assertEquals(" c11 c12 c13 c2  c31 ", sb.toString()); //note spaces!
+		Assert.assertEquals("() c11 c12 c13 c2 () c31 ", sb.toString()); //note spaces!
 	}	
 		
 	@Test
